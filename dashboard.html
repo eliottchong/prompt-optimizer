@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Prompt Optimizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0f1419;
+        --surface: #1a2332;
+        --surface-hover: #222d3f;
+        --border: #2d3a4f;
+        --text: #e8edf4;
+        --muted: #8b9cb3;
+        --accent: #3d9cf0;
+        --accent-dim: #2a7fc4;
+        --success: #34d399;
+        --error: #f87171;
+        --radius: 12px;
+        --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "DM Sans", system-ui, sans-serif;
+        background: radial-gradient(1200px 800px at 10% -10%, #1e3a5f 0%, transparent 55%),
+          radial-gradient(900px 600px at 100% 0%, #1a3044 0%, transparent 50%), var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+      }
+
+      .wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 3rem;
+      }
+
+      header {
+        margin-bottom: 1.75rem;
+      }
+
+      header h1 {
+        font-size: 1.65rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin: 0 0 0.35rem;
+      }
+
+      header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .hint {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem 1.15rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+      }
+
+      .hint strong {
+        color: var(--accent);
+        font-weight: 600;
+      }
+
+      .grid {
+        display: grid;
+        gap: 1.25rem;
+      }
+
+      @media (min-width: 840px) {
+        .grid {
+          grid-template-columns: 1fr 1fr;
+          align-items: stretch;
+        }
+      }
+
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.1rem 1.15rem 1.15rem;
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        min-height: 320px;
+      }
+
+      .panel h2 {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin: 0 0 0.65rem;
+        font-weight: 600;
+      }
+
+      textarea {
+        flex: 1;
+        min-height: 240px;
+        width: 100%;
+        resize: vertical;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: #121a26;
+        color: var(--text);
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.85rem;
+        line-height: 1.55;
+        padding: 0.75rem 0.85rem;
+      }
+
+      textarea:focus {
+        outline: 2px solid var(--accent-dim);
+        outline-offset: 1px;
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        align-items: center;
+        margin-top: 1rem;
+      }
+
+      button {
+        font-family: inherit;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: none;
+        border-radius: 8px;
+        padding: 0.55rem 1.1rem;
+        cursor: pointer;
+        transition: background 0.15s, transform 0.1s;
+      }
+
+      button:active {
+        transform: scale(0.98);
+      }
+
+      button.primary {
+        background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dim) 100%);
+        color: #fff;
+      }
+
+      button.primary:hover:not(:disabled) {
+        filter: brightness(1.06);
+      }
+
+      button.secondary {
+        background: var(--surface-hover);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+
+      button.secondary:hover:not(:disabled) {
+        background: #2a3649;
+      }
+
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      .status {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-left: auto;
+      }
+
+      .status.error {
+        color: var(--error);
+      }
+
+      .status.ok {
+        color: var(--success);
+      }
+
+      footer {
+        margin-top: 2rem;
+        font-size: 0.8rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      footer code {
+        font-family: "JetBrains Mono", monospace;
+        background: var(--surface);
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Prompt Optimizer</h1>
+        <p>Clean and structure your prompt using the local Python pipeline.</p>
+      </header>
+
+      <div class="hint">
+        <strong>Recommended format:</strong>
+        Role → Context → Task → Constraints → Output format
+      </div>
+
+      <div class="grid">
+        <section class="panel">
+          <h2>Input</h2>
+          <textarea id="input" placeholder="Paste your raw prompt here…" spellcheck="false"></textarea>
+          <div class="toolbar">
+            <button type="button" class="primary" id="run">Optimize</button>
+            <button type="button" class="secondary" id="clear">Clear</button>
+            <span class="status" id="status" aria-live="polite"></span>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Output</h2>
+          <textarea id="output" readonly placeholder="Optimized prompt appears here…" spellcheck="false"></textarea>
+          <div class="toolbar">
+            <button type="button" class="secondary" id="copy">Copy output</button>
+          </div>
+        </section>
+      </div>
+
+      <footer>
+        Run <code>python server.py</code> in this folder, then open this page at
+        <code>http://127.0.0.1:8765/</code>
+      </footer>
+    </div>
+
+    <script>
+      const input = document.getElementById("input");
+      const output = document.getElementById("output");
+      const runBtn = document.getElementById("run");
+      const clearBtn = document.getElementById("clear");
+      const copyBtn = document.getElementById("copy");
+      const status = document.getElementById("status");
+
+      function setStatus(text, kind) {
+        status.textContent = text || "";
+        status.className = "status" + (kind ? " " + kind : "");
+      }
+
+      async function optimize() {
+        const prompt = input.value;
+        setStatus("");
+        runBtn.disabled = true;
+        copyBtn.disabled = true;
+        try {
+          const res = await fetch("/api/optimize", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            throw new Error(data.error || res.statusText || "Request failed");
+          }
+          output.value = data.output ?? "";
+          setStatus("Done.", "ok");
+          copyBtn.disabled = !output.value;
+        } catch (e) {
+          output.value = "";
+          setStatus(e.message || "Network error — is the server running?", "error");
+          copyBtn.disabled = true;
+        } finally {
+          runBtn.disabled = false;
+        }
+      }
+
+      runBtn.addEventListener("click", optimize);
+      clearBtn.addEventListener("click", () => {
+        input.value = "";
+        output.value = "";
+        setStatus("");
+        copyBtn.disabled = true;
+      });
+      copyBtn.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(output.value);
+          setStatus("Copied.", "ok");
+        } catch {
+          setStatus("Copy failed — select text manually.", "error");
+        }
+      });
+      copyBtn.disabled = true;
+
+      input.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+          e.preventDefault();
+          optimize();
+        }
+      });
+    </script>
+  </body>
+</html>
