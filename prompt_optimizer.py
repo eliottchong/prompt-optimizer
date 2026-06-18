@@ -62,6 +62,10 @@ _FILLER_PHRASES: Final[tuple[str, ...]] = (
     "hi",
     "it is",
     "this is",
+    "start by",
+    "begin by",
+    "I need you to",
+    "I want you to",
 )
 
 
@@ -84,7 +88,7 @@ def _break_long_sentences(text: str, max_words: int = 20) -> str:
             rebuilt.append(sent)
             continue
         s = sent
-        for conj in (" and ", " or ", " but "):
+        for conj in (" and ", " or ", " but ", "however","as well as"):
             s = re.sub(re.escape(conj), "\n", s, flags=re.IGNORECASE)
         rebuilt.append(s)
     return " ".join(rebuilt)
