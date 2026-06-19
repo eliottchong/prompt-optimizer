@@ -66,9 +66,17 @@ _FILLER_PHRASES: Final[tuple[str, ...]] = (
     "begin by",
     "i need you to",
     "i want you to",
+    "i want to",
     "claude",
     "gemini",
     "chatgpt",
+    "what's",
+    "what is the",
+    "what",
+    "of these",
+    "are",
+    "when you conduct your analysis, include",
+    "as well as",
 )
 # Each entry is stripped only when it appears as a whole word or run of whole
 # words (never as a substring inside a larger token). Matching is
