@@ -1,6 +1,6 @@
 # Prompt Optimizer
 
-Small toolkit that **normalizes and lightly structures** raw prompt text: whitespace, long-sentence breaks, bullet prefixes, spelled-out numbers, and common filler phrases. Includes a **CLI** and a **local web dashboard** backed by the same Python function.
+Small toolkit that **normalizes and lightly structures** raw prompt text: whitespace, long-sentence breaks, bullet prefixes, spelled-out numbers, and common filler phrases. Also estimates the 'before-and-after' token count of raw prompt compared to cleaned prompt. Includes a **CLI** and a **local web dashboard** backed by the same Python function.
 
 > This is heuristic cleanup, not an LLM rewrite. Review output before production use.
 
