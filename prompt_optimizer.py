@@ -66,6 +66,9 @@ _FILLER_PHRASES: Final[tuple[str, ...]] = (
     "begin by",
     "i need you to",
     "i want you to",
+    "claude",
+    "gemini",
+    "chatgpt",
 )
 # Each entry is stripped only when it appears as a whole word or run of whole
 # words (never as a substring inside a larger token). Matching is
@@ -169,6 +172,25 @@ def _collapse_adjacent_dots(text: str) -> str:
     return "".join(chars)
 
 
+def token_counter(x: str) -> float:
+    """
+    Rough token estimate for English-ish LLM context (not tokenizer-exact).
+
+    Heuristics combined:
+    - ~1 token per 4 characters
+    - ~1 token per ¾ word (i.e. tokens ≈ words / 0.75; 100 tokens ≈ 75 words)
+    - Order-of-magnitude checks: ~30 tokens for 1–2 sentences, ~100 per paragraph,
+      ~2048 tokens for ~1,500 words (used to sanity-check the blend)
+
+    Uses the mean of the character-based and word-based estimates.
+    """
+    if not x:
+        return 0.0
+    char_est = len(x) / 4.0
+    word_est = len(x.split()) / 0.75
+    return (char_est + word_est) / 2.0
+
+
 def clean_prompt(prompt: str) -> str:
     """
     1. Strip outer whitespace.
@@ -199,7 +221,9 @@ def main() -> None:
         raw = sys.stdin.read()
 
     cleaned = clean_prompt(raw)
-    print(cleaned)
+    print(f"Raw token count: {token_counter(raw)}")
+    print(f"Cleaned token count: {token_counter(cleaned)}")
+    print(f"Cleaned prompt: {cleaned}")
 
 
 if __name__ == "__main__":
