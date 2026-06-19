@@ -64,8 +64,26 @@ _FILLER_PHRASES: Final[tuple[str, ...]] = (
     "this is",
     "start by",
     "begin by",
-    "I need you to",
-    "I want you to",
+    "i need you to",
+    "i want you to",
+)
+# Each entry is stripped only when it appears as a whole word or run of whole
+# words (never as a substring inside a larger token). Matching is
+# case-insensitive (e.g. Please, THANK YOU, i NeEd YoU tO). Multi-word
+# phrases tolerate any stretch of whitespace between the words.
+
+
+def _filler_regex_for_phrase(phrase: str) -> re.Pattern[str]:
+    """Case-insensitive whole-word(s) match; internal gaps allow any whitespace."""
+    words = phrase.split()
+    if not words:
+        return re.compile("(?!.)")
+    core = r"\s+".join(re.escape(w) for w in words)
+    return re.compile(rf"(?i)(?<!\w){core}(?!\w)")
+
+
+_FILLER_COMPILED: Final[tuple[re.Pattern[str], ...]] = tuple(
+    _filler_regex_for_phrase(p) for p in sorted(_FILLER_PHRASES, key=len, reverse=True)
 )
 
 
@@ -120,10 +138,35 @@ def _spell_numbers_to_digits(text: str) -> str:
 
 def _remove_filler(text: str) -> str:
     out = text
-    for phrase in sorted(_FILLER_PHRASES, key=len, reverse=True):
-        pattern = rf"\b{re.escape(phrase)}\b"
-        out = re.sub(pattern, "", out, flags=re.IGNORECASE)
+    for pat in _FILLER_COMPILED:
+        out = pat.sub("", out)
     return re.sub(r"\s{2,}", " ", out).strip()
+
+
+def _collapse_adjacent_dots(text: str) -> str:
+    """
+    Remove a redundant ``.`` when it follows another ``.`` directly (``..``)
+    or only separated by whitespace (``. .``), using ``list.pop()`` on the
+    latter dot.
+    """
+    chars = list(text)
+    i = 0
+    while i < len(chars):
+        if chars[i] != ".":
+            i += 1
+            continue
+        nxt = i + 1
+        if nxt < len(chars) and chars[nxt] == ".":
+            chars.pop(nxt)
+            continue
+        j = nxt
+        while j < len(chars) and chars[j].isspace():
+            j += 1
+        if j < len(chars) and chars[j] == ".":
+            chars.pop(j)
+            continue
+        i += 1
+    return "".join(chars)
 
 
 def clean_prompt(prompt: str) -> str:
@@ -133,13 +176,15 @@ def clean_prompt(prompt: str) -> str:
     3. Prefix non-empty lines with '- ' where missing.
     4. Replace common spelled-out number words with digits.
     5. Remove light filler phrases.
-    6. Return cleaned prompt.
+    6. Remove a later ``.`` when it immediately follows ``.`` or ``.`` + whitespace.
+    7. Return cleaned prompt.
     """
     s = _strip_whitespace(prompt)
     s = _break_long_sentences(s)
     s = _dash_prefix_lines(s)
     s = _spell_numbers_to_digits(s)
     s = _remove_filler(s)
+    s = _collapse_adjacent_dots(s)
     return s.strip()
 
 
