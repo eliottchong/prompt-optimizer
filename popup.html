@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Prompt Optimizer</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        width: 400px;
+        margin: 0;
+        padding: 16px;
+        color: #202124;
+        font: 14px/1.4 system-ui, sans-serif;
+      }
+      h1 { margin: 0 0 14px; font-size: 18px; }
+      label { display: block; margin: 12px 0 5px; font-weight: 600; }
+      input, textarea, button {
+        border: 1px solid #bdc1c6;
+        border-radius: 6px;
+        font: inherit;
+      }
+      input, textarea { width: 100%; padding: 8px; }
+      textarea { min-height: 110px; resize: vertical; }
+      button {
+        padding: 8px 12px;
+        background: #fff;
+        cursor: pointer;
+      }
+      button:hover { background: #f8f9fa; }
+      button:disabled { cursor: wait; opacity: .6; }
+      .row { display: flex; gap: 8px; }
+      .row input { flex: 1; }
+      .primary {
+        width: 100%;
+        margin-top: 10px;
+        border-color: #1a73e8;
+        background: #1a73e8;
+        color: #fff;
+      }
+      .primary:hover { background: #1765cc; }
+      .status { min-height: 20px; margin-top: 6px; color: #5f6368; }
+      .status[data-kind="error"] { color: #b3261e; }
+      .metrics { margin: 8px 0; color: #5f6368; }
+      #copyButton { margin-top: 8px; }
+      [hidden] { display: none; }
+    </style>
+  </head>
+  <body>
+    <h1>Prompt Optimizer</h1>
+
+    <label for="apiKey">Gemini API key</label>
+    <div class="row">
+      <input id="apiKey" type="password" autocomplete="off" spellcheck="false">
+      <button id="saveKey" type="button">Save</button>
+    </div>
+    <div id="keyStatus" class="status" role="status" aria-live="polite"></div>
+
+    <label for="prompt">Prompt</label>
+    <textarea id="prompt" placeholder="Paste prompt here"></textarea>
+    <button id="optimizeButton" class="primary" type="button">Optimize</button>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+
+    <section id="result" hidden>
+      <div id="metrics" class="metrics"></div>
+      <label for="output">Optimized prompt</label>
+      <textarea id="output" readonly></textarea>
+      <button id="copyButton" type="button">Copy</button>
+    </section>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
